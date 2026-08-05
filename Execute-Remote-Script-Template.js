@@ -6,7 +6,9 @@ const ScriptUrl = "https://raw.githubusercontent.com/alexcahill/iOS-Scriptable-R
 
 // Cache Logic
 
-if (!Keychain.contains(Script.name()+".Cache.Date") || (new Date()).getTime() >= Keychain.get(Script.name()+".Cache.Date") + CacheValidDuration * 60000 /* To MS */) {
+if (CacheValidDuration == 0 ||
+    !Keychain.contains(Script.name()+".Cache.Date") || 
+    (new Date()).getTime() >= parseInt(Keychain.get(Script.name()+".Cache.Date")) + CacheValidDuration * 60000 /* To MS */) {
 
     var Req = new Request(ScriptUrl);
     var Contents = await Req.loadString();
