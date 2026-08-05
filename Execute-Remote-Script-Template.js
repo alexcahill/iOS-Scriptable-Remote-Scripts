@@ -2,7 +2,7 @@
 // Script Settings
 
 const CacheValidDuration = 60 * 24; // In Minutes, or 0 to disable;
-const ScriptUrl = "https://raw.githubusercontent.com/alexcahill/iOS-Scriptable-Remote-Scripts/main/TestScript.js";
+const ScriptUrl = "https://raw.githubusercontent.com/alexcahill/iOS-Scriptable-Remote-Scripts/main/TestScript.js"; // Replace with your hosted script link!
 
 // Cache Logic
 
