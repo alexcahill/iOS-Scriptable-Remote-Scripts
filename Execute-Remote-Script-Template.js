@@ -11,7 +11,7 @@ if (!Keychain.contains(Script.name()+".Cache.Date") || (new Date()).getTime() >=
     var Req = new Request(ScriptUrl);
     var Contents = await Req.loadString();
     Keychain.set(Script.name()+".Cache.Value", Contents);
-    Keychain.set(Script.name()+".Cache.Date", (new Date()).getTime());
+    Keychain.set(Script.name()+".Cache.Date", (new Date()).getTime().toString());
 
 }    
 
