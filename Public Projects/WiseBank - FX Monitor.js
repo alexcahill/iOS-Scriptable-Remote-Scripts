@@ -142,9 +142,6 @@ async function RemoteScriptSafeBlock() {
                     AVGT += Amount;
                     AVGRT += parseFloat(CSV.Data("Exchange Rate", i)) * Amount;
                 }
-                else if (CSV.Data("Transaction Details Type", i) === "CONVERSION" && CSV.Data("Exchange To", i) === "USD") {
-                    JPY -= parseFloat(CSV.Data("Description", i).split(" ")[1]);
-                }
 
 
                 Fee += parseFloat(CSV.Data("Total fees", i));
