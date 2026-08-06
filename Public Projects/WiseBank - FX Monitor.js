@@ -14,7 +14,7 @@ var Parameters = {
     Fees: 0
 };
 
-
+/*
 async function GetCurrentBid() {
     return 0;
 }
@@ -278,3 +278,5 @@ else {
 }
 
 Script.complete();
+
+*/
