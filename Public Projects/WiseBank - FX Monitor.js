@@ -33,8 +33,11 @@ async function GetCurrentBid() { // In Yen
     
 }
 
+async function Main() {
+    console.log(await GetCurrentBid());
+}
 
-console.log(await GetCurrentBid());
+Main();
 
 /*
 
