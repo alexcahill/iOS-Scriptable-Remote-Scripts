@@ -16,22 +16,7 @@ var Parameters = {
 
 
 async function GetCurrentBid() {
-    let Req = new Request("https://finance.yahoo.com/");
-    Req.headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-    };
-    let Res = await Req.loadString();
-    let Items = Res.split("JPY=X");
-    if (Items.length < 2)
-        return -1;
-    Items = Items[1].split("regularMarketPrice");
-    if (Items.length < 2)
-        return -2;
-    Items = Items[1].split("fmt")[1].split(".");
-
-    Items = [Items[0].substring(Items[0].lastIndexOf('"') + 1), Items[1].substring(0, Items[1].search("\""))]
-
-    return parseFloat(Items.join("."));
+    return 0;
 }
 
 
