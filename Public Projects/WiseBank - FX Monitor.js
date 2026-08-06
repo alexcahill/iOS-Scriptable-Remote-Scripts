@@ -1,123 +1,124 @@
 
-
-const ConversionLossRate = (315781 - 2071) / 315781; //estimated...
-const FILE_NAME = "Info.json";
-const FSO = FileManager.local();
-
-var Parameters = {
-    Capital: 0,
-    USD: 0,
-    JPY: 0,
-    Interest: 0,
-    AVG: 0,
-    AVGT: 0,
-    Fees: 0
-};
+function RemoteScriptSafeBlock() {
 
 
-async function GetCurrentBid() { // In Yen
+    const ConversionLossRate = (315781 - 2071) / 315781; //estimated...
+    const FILE_NAME = "Info.json";
+    const FSO = FileManager.local();
 
-    var Req = new Request("https://query1.finance.yahoo.com/v6/finance/quote/marketSummary");
-    var Result = await Req.loadJSON();
-
-    if (!Result['marketSummaryResponse'])
-        throw "Error, unexpected response";
-    Result = Result['marketSummaryResponse'];
-    if (!Result['result'] || Result['result'] == 0)
-        throw "Error, no result";
-    Result = Result['result'];
-    for (var i = 0; i < Result.length; i++)
-        if (Result[i]['currency'] && Result[i]['currency'] == "JPY")
-            return Result[i]['regularMarketPrice']['raw'];
-    throw "Error, JPY not in the result list";
-
-}
+    var Parameters = {
+        Capital: 0,
+        USD: 0,
+        JPY: 0,
+        Interest: 0,
+        AVG: 0,
+        AVGT: 0,
+        Fees: 0
+    };
 
 
-function floor(Number, Places = 2) {
+    async function GetCurrentBid() { // In Yen
 
-    if (isNaN(Number))
-        Number = 0;
-    return (Math.floor(Number * (10 ** Places)) / (10 ** Places)).toLocaleString('en-US', {
-        minimumFractionDigits: Math.max(Places, 0),
-        maximumFractionDigits: Math.max(Places, 0)
-    });
-}
+        var Req = new Request("https://query1.finance.yahoo.com/v6/finance/quote/marketSummary");
+        var Result = await Req.loadJSON();
 
-function Notify(Text, Title) {
-    var N = new Notification();
-    N.body = Text;
-    if (Title)
-        N.title = Title;
-    N.schedule();
-}
+        if (!Result['marketSummaryResponse'])
+            throw "Error, unexpected response";
+        Result = Result['marketSummaryResponse'];
+        if (!Result['result'] || Result['result'] == 0)
+            throw "Error, no result";
+        Result = Result['result'];
+        for (var i = 0; i < Result.length; i++)
+            if (Result[i]['currency'] && Result[i]['currency'] == "JPY")
+                return Result[i]['regularMarketPrice']['raw'];
+        throw "Error, JPY not in the result list";
 
-function NotifyError(Text) {
-    Notify(Text, "Error");
-    Script.complete();
-}
+    }
 
-function ParseCSV(String) {
-    try {
-        var [bInQuotes, LastIndex, bFirstChar, Table, Line] = [0, 0, true, [], []];
-        for (var i = 0; i < String.length; i++) {
-            if (!!bInQuotes) {
-                if (String[i] == '"' && String[i + 1] != '"')
-                    if (String[i + 1] != ',' && String[i + 1] != '\n')
-                        throw "Error at char[" + i + "]";
-                    else;
-                else continue;
-            }
-            else {
-                if (String[i] == '"')
-                    if (bFirstChar) {
-                        bInQuotes = 1;
+
+    function floor(Number, Places = 2) {
+
+        if (isNaN(Number))
+            Number = 0;
+        return (Math.floor(Number * (10 ** Places)) / (10 ** Places)).toLocaleString('en-US', {
+            minimumFractionDigits: Math.max(Places, 0),
+            maximumFractionDigits: Math.max(Places, 0)
+        });
+    }
+
+    function Notify(Text, Title) {
+        var N = new Notification();
+        N.body = Text;
+        if (Title)
+            N.title = Title;
+        N.schedule();
+    }
+
+    function NotifyError(Text) {
+        Notify(Text, "Error");
+        Script.complete();
+    }
+
+    function ParseCSV(String) {
+        try {
+            var [bInQuotes, LastIndex, bFirstChar, Table, Line] = [0, 0, true, [], []];
+            for (var i = 0; i < String.length; i++) {
+                if (!!bInQuotes) {
+                    if (String[i] == '"' && String[i + 1] != '"')
+                        if (String[i + 1] != ',' && String[i + 1] != '\n')
+                            throw "Error at char[" + i + "]";
+                        else;
+                    else continue;
+                }
+                else {
+                    if (String[i] == '"')
+                        if (bFirstChar) {
+                            bInQuotes = 1;
+                            bFirstChar = false;
+                            continue;
+                        }
+                        else
+                            throw "Error at char[" + i + "], '\"' Detected mid data, outside of quotes, & unescaped.";
+                    else if (String[i] != ',' && String[i] != '\n') {
                         bFirstChar = false;
                         continue;
                     }
-                    else
-                        throw "Error at char[" + i + "], '\"' Detected mid data, outside of quotes, & unescaped.";
-                else if (String[i] != ',' && String[i] != '\n') {
-                    bFirstChar = false;
-                    continue;
                 }
+                Line.push(String.substr(LastIndex + bInQuotes, i - LastIndex - bInQuotes));
+                LastIndex = i + 1 + bInQuotes;
+                if (!!bInQuotes)
+                    i++, bInQuotes = 0;
+                bFirstChar = true;
+                if (String[i] == '\n')
+                    Table.push(Line), Line = [];
             }
-            Line.push(String.substr(LastIndex + bInQuotes, i - LastIndex - bInQuotes));
-            LastIndex = i + 1 + bInQuotes;
-            if (!!bInQuotes)
-                i++, bInQuotes = 0;
-            bFirstChar = true;
-            if (String[i] == '\n')
-                Table.push(Line), Line = [];
-        }
-        this.RawData = Table;
-        this.ColumnLenght = (Table.length ? Table[0].length : 0),
-            this.Enteries = Math.max(Table.length - 1, 0);
-        this.IndexOf = (String) => {
-            if (!this.Enteries)
-                return -1;
-            else
-                return this.RawData[0].indexOf(String);
-        };
-        this.HasColumn = (String) => {
-            return this.IndexOf(String) != -1;
-        };
-        this.At = (Column, Row) => {
-            if (Column < 0 || Row < 0 || Column >= this.ColumnLenght || Row >= this.Enteries)
-                throw "Error Index out of bounds";
-            return this.RawData[Row + 1][Column];
-        };
-        this.Data = (ColumnString, Row) => {
-            var Index = this.IndexOf(ColumnString);
-            if (!Index)
-                throw "Error No Column with given string";
-            return this.At(Index, Row);
-        };
-    } catch (e) { NotifyError("Error In ParseCSV -> " + e.toString()); }
-}
+            this.RawData = Table;
+            this.ColumnLenght = (Table.length ? Table[0].length : 0),
+                this.Enteries = Math.max(Table.length - 1, 0);
+            this.IndexOf = (String) => {
+                if (!this.Enteries)
+                    return -1;
+                else
+                    return this.RawData[0].indexOf(String);
+            };
+            this.HasColumn = (String) => {
+                return this.IndexOf(String) != -1;
+            };
+            this.At = (Column, Row) => {
+                if (Column < 0 || Row < 0 || Column >= this.ColumnLenght || Row >= this.Enteries)
+                    throw "Error Index out of bounds";
+                return this.RawData[Row + 1][Column];
+            };
+            this.Data = (ColumnString, Row) => {
+                var Index = this.IndexOf(ColumnString);
+                if (!Index)
+                    throw "Error No Column with given string";
+                return this.At(Index, Row);
+            };
+        } catch (e) { NotifyError("Error In ParseCSV -> " + e.toString()); }
+    }
 
 
-function Main() {
 
     // --- DecodeWiseCSV handler ---
     // 
@@ -296,4 +297,4 @@ function Main() {
 
 }
 
-Main();
+RemoteScriptSafeBlock();
