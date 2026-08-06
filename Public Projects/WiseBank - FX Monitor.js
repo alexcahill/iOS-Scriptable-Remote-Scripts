@@ -1,5 +1,5 @@
 
-function RemoteScriptSafeBlock() {
+async function RemoteScriptSafeBlock() {
 
 
     const ConversionLossRate = (315781 - 2071) / 315781; //estimated...
