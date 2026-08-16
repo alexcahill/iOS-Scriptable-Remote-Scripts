@@ -161,7 +161,7 @@ var InjectionScripts = {
 async function RedirectCompletion(TargetSite, Url) {
 
     var CompletePromise = null;
-    var Result = new Promise((CP) => { CompletePromise = CP; }); // Don't know how and why it works, but it does.
+    var Result = new Promise((CP) => { CompletePromise = CP; }); // Don't know how and why it works, but it does. (JK)
     var Count = 0, MaxCount = 10;
 
     async function EvalSiteURL() {
@@ -236,7 +236,6 @@ async function DownloadContent(URL) {
 // URL expects a encoded URI string
 async function RunInShortcutsShareSheet(URL /* Hopefully... */) {
 
-    Notify("Downloading URL:\n" + decodeURIComponent (decodeURIComponent(URL)), "YouTubeDL");
     var TargetSite = new WebView();
     TargetSite.present();
     await TargetSite.loadURL("https://ddownr.org/?link=" + URL);
